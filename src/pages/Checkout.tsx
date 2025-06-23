@@ -72,6 +72,10 @@ const Checkout = () => {
     alert("Order placed successfully! (This is a demo)");
   };
 
+  const handleSameAsShippingChange = (checked: boolean | "indeterminate") => {
+    setSameAsShipping(checked === true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -220,7 +224,7 @@ const Checkout = () => {
                   <Checkbox
                     id="sameAsShipping"
                     checked={sameAsShipping}
-                    onCheckedChange={setSameAsShipping}
+                    onCheckedChange={handleSameAsShippingChange}
                   />
                   <Label htmlFor="sameAsShipping">Same as shipping address</Label>
                 </div>
