@@ -1,20 +1,21 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Heart, Share2, Star, ShoppingCart, Truck, Shield, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
+import { useWishlist } from "@/contexts/WishlistContext";
+import AIRecommendations from "@/components/AIRecommendations";
+import { allProducts } from "@/data/products";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
 
-  // Mock product data - in a real app, this would come from an API
-  const product = {
+  // Find the product from our data
+  const product = allProducts.find(p => p.id === parseInt(id || '0')) || {
     id: 1,
     name: "MacBook Pro 16-inch M3 Pro",
     price: 2399.99,
@@ -26,6 +27,7 @@ const ProductDetails = () => {
     brand: "Apple",
     inStock: true,
     stockCount: 12,
+    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600",
     images: [
       "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600",
       "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600",
@@ -53,6 +55,17 @@ const ProductDetails = () => {
       "Three Thunderbolt 4 ports, HDMI port, SDXC card slot, headphone jack, MagSafe 3 port"
     ],
     description: "The most powerful MacBook Pro ever is here. With the blazing-fast M3 Pro chip — built on 3-nanometer technology — you get exceptional performance and amazing battery life. Whether you're editing 8K video, compiling code, or running intensive workloads, MacBook Pro delivers unprecedented speed and capability."
+  };
+
+  const isWishlisted = isInWishlist(product.id);
+  const images = (product as any).images || [product.image, product.image, product.image, product.image];
+
+  const handleWishlistToggle = () => {
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product.id);
+    }
   };
 
   return (
@@ -83,13 +96,13 @@ const ProductDetails = () => {
           <div className="space-y-4">
             <div className="aspect-square overflow-hidden rounded-lg bg-white border">
               <img
-                src={product.images[selectedImage]}
+                src={images[selectedImage]}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {product.images.map((image, index) => (
+              {images.map((image: string, index: number) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -112,7 +125,7 @@ const ProductDetails = () => {
             <div>
               <Badge variant="secondary" className="mb-2">{product.category}</Badge>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-              <p className="text-gray-600">{product.brand}</p>
+              <p className="text-gray-600">{(product as any).brand || 'Premium Brand'}</p>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -180,7 +193,7 @@ const ProductDetails = () => {
                   </Button>
                 </div>
                 <span className="text-sm text-gray-600">
-                  ({product.stockCount} available)
+                  ({(product as any).stockCount || 10} available)
                 </span>
               </div>
 
@@ -194,7 +207,7 @@ const ProductDetails = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => setIsWishlisted(!isWishlisted)}
+                  onClick={handleWishlistToggle}
                   className={isWishlisted ? 'text-red-500 border-red-500' : ''}
                 >
                   <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-current' : ''}`} />
@@ -239,7 +252,7 @@ const ProductDetails = () => {
         </div>
 
         {/* Product Details Tabs */}
-        <Tabs defaultValue="description" className="w-full">
+        <Tabs defaultValue="description" className="w-full mb-8">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="specifications">Specifications</TabsTrigger>
@@ -249,11 +262,11 @@ const ProductDetails = () => {
           <TabsContent value="description" className="mt-6">
             <div className="bg-white p-6 rounded-lg">
               <h3 className="text-xl font-semibold mb-4">Product Description</h3>
-              <p className="text-gray-700 mb-6">{product.description}</p>
+              <p className="text-gray-700 mb-6">{(product as any).description}</p>
               
               <h4 className="text-lg font-semibold mb-3">Key Features</h4>
               <ul className="space-y-2">
-                {product.features.map((feature, index) => (
+                {((product as any).features || []).map((feature: string, index: number) => (
                   <li key={index} className="flex items-start">
                     <span className="text-blue-600 mr-2">•</span>
                     <span className="text-gray-700">{feature}</span>
@@ -267,10 +280,10 @@ const ProductDetails = () => {
             <div className="bg-white p-6 rounded-lg">
               <h3 className="text-xl font-semibold mb-4">Technical Specifications</h3>
               <div className="space-y-3">
-                {Object.entries(product.specifications).map(([key, value]) => (
+                {Object.entries((product as any).specifications || {}).map(([key, value]) => (
                   <div key={key} className="flex justify-between border-b pb-2">
                     <span className="font-medium text-gray-900">{key}</span>
-                    <span className="text-gray-700">{value}</span>
+                    <span className="text-gray-700">{value as string}</span>
                   </div>
                 ))}
               </div>
@@ -304,6 +317,12 @@ const ProductDetails = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* AI Recommendations */}
+        <AIRecommendations 
+          currentProduct={product}
+          title="Similar Products You Might Like"
+        />
       </div>
     </div>
   );

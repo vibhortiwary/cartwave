@@ -6,89 +6,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/ProductCard";
 import FeaturedBanner from "@/components/FeaturedBanner";
+import AIRecommendations from "@/components/AIRecommendations";
+import { allProducts } from "@/data/products";
+import { useWishlist } from "@/contexts/WishlistContext";
 
 const Index = () => {
   const [cartCount, setCartCount] = useState(0);
+  const { wishlistItems } = useWishlist();
 
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "MacBook Pro 16-inch",
-      price: 2399.99,
-      originalPrice: 2699.99,
-      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
-      rating: 4.8,
-      reviews: 1247,
-      discount: 11,
-      category: "Laptops"
-    },
-    {
-      id: 2,
-      name: "iPhone 15 Pro",
-      price: 999.99,
-      originalPrice: 1099.99,
-      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400",
-      rating: 4.9,
-      reviews: 2156,
-      discount: 9,
-      category: "Smartphones"
-    },
-    {
-      id: 3,
-      name: "Sony WH-1000XM5",
-      price: 349.99,
-      originalPrice: 399.99,
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
-      rating: 4.7,
-      reviews: 856,
-      discount: 13,
-      category: "Audio"
-    },
-    {
-      id: 4,
-      name: "Gaming Chair Pro",
-      price: 299.99,
-      originalPrice: 399.99,
-      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
-      rating: 4.6,
-      reviews: 432,
-      discount: 25,
-      category: "Furniture"
-    },
-    {
-      id: 5,
-      name: "Smart Watch Series 9",
-      price: 399.99,
-      originalPrice: 449.99,
-      image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400",
-      rating: 4.8,
-      reviews: 1683,
-      discount: 11,
-      category: "Wearables"
-    },
-    {
-      id: 6,
-      name: "4K Camera DSLR",
-      price: 899.99,
-      originalPrice: 1199.99,
-      image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400",
-      rating: 4.9,
-      reviews: 743,
-      discount: 25,
-      category: "Cameras"
-    }
-  ];
+  const featuredProducts = allProducts.slice(0, 6);
 
   const categories = [
-    { name: "Electronics", icon: "💻" },
-    { name: "Fashion", icon: "👕" },
-    { name: "Home & Garden", icon: "🏠" },
-    { name: "Sports", icon: "⚽" },
-    { name: "Books", icon: "📚" },
-    { name: "Beauty", icon: "💄" },
-    { name: "Automotive", icon: "🚗" },
-    { name: "Health", icon: "🏥" }
+    { name: "Laptops", icon: "💻" },
+    { name: "Smartphones", icon: "📱" },
+    { name: "Audio", icon: "🎧" },
+    { name: "Furniture", icon: "🪑" },
+    { name: "Wearables", icon: "⌚" },
+    { name: "Cameras", icon: "📷" },
+    { name: "Gaming", icon: "🎮" },
+    { name: "Fashion", icon: "👕" }
   ];
+
+  const handleCategoryClick = (categoryName: string) => {
+    // Navigate to products page with category filter
+    window.location.href = `/products?category=${encodeURIComponent(categoryName)}`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -108,7 +50,7 @@ const Index = () => {
                 <Link to="/categories" className="text-gray-700 hover:text-blue-600 transition-colors">
                   Categories
                 </Link>
-                <Link to="/deals" className="text-gray-700 hover:text-blue-600 transition-colors">
+                <Link to="/products?sort=discount" className="text-gray-700 hover:text-blue-600 transition-colors">
                   Deals
                 </Link>
               </div>
@@ -119,9 +61,16 @@ const Index = () => {
                 <User className="h-4 w-4 mr-2" />
                 Sign In
               </Button>
-              <Button variant="ghost" size="sm">
-                <Heart className="h-4 w-4" />
-              </Button>
+              <Link to="/products?wishlist=true">
+                <Button variant="ghost" size="sm" className="relative">
+                  <Heart className="h-4 w-4" />
+                  {wishlistItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {wishlistItems.length}
+                    </span>
+                  )}
+                </Button>
+              </Link>
               <Link to="/cart">
                 <Button variant="ghost" size="sm" className="relative">
                   <ShoppingCart className="h-4 w-4" />
@@ -147,11 +96,13 @@ const Index = () => {
                   placeholder="Search for products, brands and more..."
                   className="w-full pl-4 pr-12 py-3 border-2 border-gray-300 rounded-l-lg focus:border-blue-500"
                 />
-                <Button 
-                  className="absolute right-0 top-0 h-full px-6 bg-orange-500 hover:bg-orange-600 rounded-l-none"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
+                <Link to="/products">
+                  <Button 
+                    className="absolute right-0 top-0 h-full px-6 bg-orange-500 hover:bg-orange-600 rounded-l-none"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -169,6 +120,7 @@ const Index = () => {
             {categories.map((category, index) => (
               <div 
                 key={index}
+                onClick={() => handleCategoryClick(category.name)}
                 className="text-center p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer group"
               >
                 <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">
@@ -180,6 +132,11 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <div className="container mx-auto px-4">
+        {/* AI Recommendations */}
+        <AIRecommendations userPreferences={['laptops', 'smartphones', 'audio']} />
+      </div>
 
       {/* Featured Products */}
       <section className="py-8">
@@ -207,9 +164,11 @@ const Index = () => {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Super Saver Deals</h2>
           <p className="text-xl mb-6">Up to 70% off on selected items</p>
-          <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
-            Shop Now
-          </Button>
+          <Link to="/products?sort=discount">
+            <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
+              Shop Now
+            </Button>
+          </Link>
         </div>
       </section>
 
