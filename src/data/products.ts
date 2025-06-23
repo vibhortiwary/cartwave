@@ -70,12 +70,18 @@ const generateProducts = () => {
 
   const products = [];
   let id = 1;
+  const totalProducts = 5000;
+  const categoriesArray = Object.keys(categories);
+  const productsPerCategory = Math.floor(totalProducts / categoriesArray.length);
 
-  Object.entries(categories).forEach(([category, config]) => {
+  categoriesArray.forEach((category, categoryIndex) => {
+    const config = categories[category as keyof typeof categories];
     const categoryImages = images[category as keyof typeof images];
     
-    // Generate 800+ products per category to reach ~5000 total
-    for (let i = 0; i < 850; i++) {
+    // Generate equal products for each category (833 products each for 6 categories = 4998, then add 2 more)
+    const productsToGenerate = categoryIndex < categoriesArray.length - 1 ? productsPerCategory : totalProducts - (productsPerCategory * (categoriesArray.length - 1));
+    
+    for (let i = 0; i < productsToGenerate; i++) {
       const brand = config.brands[Math.floor(Math.random() * config.brands.length)];
       const model = config.models[Math.floor(Math.random() * config.models.length)];
       const variation = Math.floor(Math.random() * 100) + 1;
@@ -129,6 +135,20 @@ export const searchProducts = (query: string) => {
     product.category.toLowerCase().includes(lowerQuery) ||
     product.brand.toLowerCase().includes(lowerQuery)
   );
+};
+
+export const getProductSuggestions = (query: string, limit: number = 5) => {
+  if (!query.trim()) return [];
+  
+  const lowerQuery = query.toLowerCase();
+  const suggestions = allProducts
+    .filter(product => 
+      product.name.toLowerCase().includes(lowerQuery) ||
+      product.brand.toLowerCase().includes(lowerQuery)
+    )
+    .slice(0, limit);
+    
+  return suggestions;
 };
 
 export const getProductById = (id: number) => {

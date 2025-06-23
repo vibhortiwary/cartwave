@@ -1,12 +1,12 @@
 
 import { useState } from "react";
-import { ShoppingCart, Search, User, Heart, Menu } from "lucide-react";
+import { ShoppingCart, User, Heart, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/ProductCard";
 import FeaturedBanner from "@/components/FeaturedBanner";
 import AIRecommendations from "@/components/AIRecommendations";
+import SearchWithSuggestions from "@/components/SearchWithSuggestions";
 import { allProducts } from "@/data/products";
 import { useWishlist } from "@/contexts/WishlistContext";
 
@@ -22,13 +22,10 @@ const Index = () => {
     { name: "Audio", icon: "🎧" },
     { name: "Furniture", icon: "🪑" },
     { name: "Wearables", icon: "⌚" },
-    { name: "Cameras", icon: "📷" },
-    { name: "Gaming", icon: "🎮" },
-    { name: "Fashion", icon: "👕" }
+    { name: "Cameras", icon: "📷" }
   ];
 
   const handleCategoryClick = (categoryName: string) => {
-    // Navigate to products page with category filter
     window.location.href = `/products?category=${encodeURIComponent(categoryName)}`;
   };
 
@@ -61,7 +58,7 @@ const Index = () => {
                 <User className="h-4 w-4 mr-2" />
                 Sign In
               </Button>
-              <Link to="/products?wishlist=true">
+              <Link to="/wishlist">
                 <Button variant="ghost" size="sm" className="relative">
                   <Heart className="h-4 w-4" />
                   {wishlistItems.length > 0 && (
@@ -90,20 +87,7 @@ const Index = () => {
           {/* Search bar */}
           <div className="py-4">
             <div className="flex items-center max-w-2xl mx-auto">
-              <div className="relative flex-1">
-                <Input
-                  type="search"
-                  placeholder="Search for products, brands and more..."
-                  className="w-full pl-4 pr-12 py-3 border-2 border-gray-300 rounded-l-lg focus:border-blue-500"
-                />
-                <Link to="/products">
-                  <Button 
-                    className="absolute right-0 top-0 h-full px-6 bg-orange-500 hover:bg-orange-600 rounded-l-none"
-                  >
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
+              <SearchWithSuggestions className="w-full" />
             </div>
           </div>
         </div>
@@ -116,7 +100,7 @@ const Index = () => {
       <section className="py-8 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Shop by Category</h2>
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
             {categories.map((category, index) => (
               <div 
                 key={index}
