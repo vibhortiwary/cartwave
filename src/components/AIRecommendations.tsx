@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 import ProductCard from "./ProductCard";
@@ -33,7 +32,6 @@ const AIRecommendations = ({
           );
         } else {
           recommended = await aiRecommendationService.getPersonalizedRecommendations(
-            userPreferences, 
             allProducts
           );
         }
