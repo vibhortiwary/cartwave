@@ -303,10 +303,15 @@ const Index = () => {
       {/* Mobile Navigation Bar */}
       <div className="lg:hidden mobile-nav-bar">
         <div className="flex items-center justify-around h-16 transition-all duration-300">
-          <Link to="/" className="flex flex-col items-center">
+          {/* Home icon - refreshes page on click */}
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="flex flex-col items-center"
+          >
             <img src="/favicon.ico" alt="CartWave Icon" className="w-6 h-6 mb-1" />
             <span className="text-xs font-medium">Home</span>
-          </Link>
+          </button>
           
           {/* Search Button with Animation - Only show when scrolled down */}
           {showSearchInNav && (
