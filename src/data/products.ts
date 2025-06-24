@@ -1,36 +1,35 @@
-
 // Generate a large product dataset with realistic data
 const generateProducts = () => {
   const categories = {
     "Laptops": {
       brands: ["Apple", "Dell", "HP", "Lenovo", "ASUS", "Acer", "MSI", "Razer"],
       models: ["MacBook Pro", "XPS", "Pavilion", "ThinkPad", "ROG", "Predator", "Gaming", "UltraBook"],
-      basePrice: 500
+      basePrice: 45000
     },
     "Smartphones": {
       brands: ["Apple", "Samsung", "Google", "OnePlus", "Xiaomi", "Oppo", "Vivo", "Realme"],
       models: ["iPhone", "Galaxy", "Pixel", "Nord", "Mi", "Find", "V Series", "GT"],
-      basePrice: 200
+      basePrice: 15000
     },
     "Audio": {
       brands: ["Sony", "Bose", "JBL", "Sennheiser", "Audio-Technica", "Beats", "AKG", "Shure"],
       models: ["WH-1000X", "QuietComfort", "Flip", "HD", "ATH", "Studio", "K Series", "SM"],
-      basePrice: 50
+      basePrice: 3000
     },
     "Furniture": {
       brands: ["IKEA", "Herman Miller", "Steelcase", "West Elm", "CB2", "Room & Board", "Crate & Barrel", "Pottery Barn"],
       models: ["Aeron", "Embody", "Markus", "Leap", "Series", "Collection", "Line", "Set"],
-      basePrice: 100
+      basePrice: 8000
     },
     "Wearables": {
       brands: ["Apple", "Samsung", "Fitbit", "Garmin", "Amazfit", "Huawei", "Fossil", "Suunto"],
       models: ["Watch", "Galaxy Watch", "Versa", "Fenix", "GTR", "Watch GT", "Gen", "Core"],
-      basePrice: 100
+      basePrice: 8000
     },
     "Cameras": {
       brands: ["Canon", "Nikon", "Sony", "Fujifilm", "Olympus", "Panasonic", "Leica", "Pentax"],
       models: ["EOS", "D Series", "Alpha", "X Series", "OM-D", "Lumix", "Q Series", "K Series"],
-      basePrice: 300
+      basePrice: 25000
     }
   };
 
@@ -87,7 +86,15 @@ const generateProducts = () => {
       const variation = Math.floor(Math.random() * 100) + 1;
       
       const basePrice = config.basePrice + Math.random() * config.basePrice * 4;
-      const discount = Math.floor(Math.random() * 40) + 5;
+      
+      // Generate more products with 40-50% discounts for Summer Sale
+      let discount;
+      if (Math.random() < 0.15) { // 15% chance for Summer Sale discounts
+        discount = Math.floor(Math.random() * 11) + 40; // 40-50% range
+      } else {
+        discount = Math.floor(Math.random() * 40) + 5; // 5-45% range
+      }
+      
       const originalPrice = basePrice + (basePrice * discount / 100);
       
       products.push({
@@ -120,17 +127,282 @@ const generateProducts = () => {
 
 export const allProducts = generateProducts();
 
-// Pre-defined featured products for better performance
-export const featuredProducts = allProducts.slice(0, 12);
+// Add special Summer Sale products with guaranteed 40-50% discounts
+const generateSummerSaleProducts = () => {
+  const summerSaleProducts = [
+    {
+      id: 5001,
+      name: "Apple MacBook Pro 16-inch M3 Max",
+      price: 249999,
+      originalPrice: 499999,
+      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
+      rating: 4.9,
+      reviews: 2847,
+      discount: 50,
+      category: "Laptops",
+      brand: "Apple",
+      inStock: true,
+      stockCount: 15,
+      description: "The most powerful MacBook Pro ever with M3 Max chip. Perfect for professionals and power users.",
+      specifications: {
+        "Brand": "Apple",
+        "Model": "MacBook Pro 16-inch M3 Max",
+        "Category": "Laptops",
+        "Warranty": "1 Year",
+        "Color": "Space Black"
+      }
+    },
+    {
+      id: 5002,
+      name: "Samsung Galaxy S24 Ultra",
+      price: 89999,
+      originalPrice: 179999,
+      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400",
+      rating: 4.8,
+      reviews: 1956,
+      discount: 50,
+      category: "Smartphones",
+      brand: "Samsung",
+      inStock: true,
+      stockCount: 25,
+      description: "The ultimate Galaxy experience with S Pen, AI features, and stunning camera system.",
+      specifications: {
+        "Brand": "Samsung",
+        "Model": "Galaxy S24 Ultra",
+        "Category": "Smartphones",
+        "Warranty": "1 Year",
+        "Color": "Titanium Gray"
+      }
+    },
+    {
+      id: 5003,
+      name: "Sony WH-1000XM5 Wireless Headphones",
+      price: 19999,
+      originalPrice: 39999,
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+      rating: 4.7,
+      reviews: 3421,
+      discount: 50,
+      category: "Audio",
+      brand: "Sony",
+      inStock: true,
+      stockCount: 30,
+      description: "Industry-leading noise cancellation with exceptional sound quality and comfort.",
+      specifications: {
+        "Brand": "Sony",
+        "Model": "WH-1000XM5",
+        "Category": "Audio",
+        "Warranty": "1 Year",
+        "Color": "Black"
+      }
+    },
+    {
+      id: 5004,
+      name: "Apple Watch Series 9",
+      price: 29999,
+      originalPrice: 59999,
+      image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400",
+      rating: 4.6,
+      reviews: 1876,
+      discount: 50,
+      category: "Wearables",
+      brand: "Apple",
+      inStock: true,
+      stockCount: 20,
+      description: "The most advanced Apple Watch with health monitoring and fitness tracking.",
+      specifications: {
+        "Brand": "Apple",
+        "Model": "Watch Series 9",
+        "Category": "Wearables",
+        "Warranty": "1 Year",
+        "Color": "Midnight"
+      }
+    },
+    {
+      id: 5005,
+      name: "Canon EOS R5 Mirrorless Camera",
+      price: 249999,
+      originalPrice: 499999,
+      image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400",
+      rating: 4.9,
+      reviews: 892,
+      discount: 50,
+      category: "Cameras",
+      brand: "Canon",
+      inStock: true,
+      stockCount: 8,
+      description: "Professional mirrorless camera with 45MP sensor and 8K video recording.",
+      specifications: {
+        "Brand": "Canon",
+        "Model": "EOS R5",
+        "Category": "Cameras",
+        "Warranty": "1 Year",
+        "Color": "Black"
+      }
+    },
+    {
+      id: 5006,
+      name: "Herman Miller Aeron Chair",
+      price: 39999,
+      originalPrice: 79999,
+      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
+      rating: 4.8,
+      reviews: 1245,
+      discount: 50,
+      category: "Furniture",
+      brand: "Herman Miller",
+      inStock: true,
+      stockCount: 12,
+      description: "The world's most comfortable office chair with ergonomic design.",
+      specifications: {
+        "Brand": "Herman Miller",
+        "Model": "Aeron",
+        "Category": "Furniture",
+        "Warranty": "1 Year",
+        "Color": "Graphite"
+      }
+    }
+  ];
+  
+  return summerSaleProducts;
+};
+
+// Add special New Arrivals products
+const generateNewArrivalsProducts = () => {
+  const newArrivalsProducts = [
+    {
+      id: 6001,
+      name: "Apple Vision Pro",
+      price: 349999,
+      originalPrice: 349999,
+      image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400",
+      rating: 4.9,
+      reviews: 567,
+      discount: 0,
+      category: "Wearables",
+      brand: "Apple",
+      inStock: true,
+      stockCount: 5,
+      description: "Revolutionary spatial computing device with advanced AR/VR capabilities.",
+      specifications: {
+        "Brand": "Apple",
+        "Model": "Vision Pro",
+        "Category": "Wearables",
+        "Warranty": "1 Year",
+        "Color": "Space Black"
+      }
+    },
+    {
+      id: 6002,
+      name: "Samsung Galaxy Ring",
+      price: 19999,
+      originalPrice: 19999,
+      image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400",
+      rating: 4.7,
+      reviews: 234,
+      discount: 0,
+      category: "Wearables",
+      brand: "Samsung",
+      inStock: true,
+      stockCount: 15,
+      description: "Smart ring with health monitoring and gesture controls.",
+      specifications: {
+        "Brand": "Samsung",
+        "Model": "Galaxy Ring",
+        "Category": "Wearables",
+        "Warranty": "1 Year",
+        "Color": "Titanium"
+      }
+    },
+    {
+      id: 6003,
+      name: "Google Pixel 9 Pro",
+      price: 89999,
+      originalPrice: 89999,
+      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400",
+      rating: 4.8,
+      reviews: 189,
+      discount: 0,
+      category: "Smartphones",
+      brand: "Google",
+      inStock: true,
+      stockCount: 20,
+      description: "Latest Pixel with advanced AI features and exceptional camera.",
+      specifications: {
+        "Brand": "Google",
+        "Model": "Pixel 9 Pro",
+        "Category": "Smartphones",
+        "Warranty": "1 Year",
+        "Color": "Obsidian"
+      }
+    },
+    {
+      id: 6004,
+      name: "Sony A9 III Mirrorless Camera",
+      price: 449999,
+      originalPrice: 449999,
+      image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400",
+      rating: 4.9,
+      reviews: 78,
+      discount: 0,
+      category: "Cameras",
+      brand: "Sony",
+      inStock: true,
+      stockCount: 3,
+      description: "World's fastest full-frame mirrorless camera with global shutter.",
+      specifications: {
+        "Brand": "Sony",
+        "Model": "A9 III",
+        "Category": "Cameras",
+        "Warranty": "1 Year",
+        "Color": "Black"
+      }
+    },
+    {
+      id: 6005,
+      name: "Microsoft Surface Laptop Studio 2",
+      price: 199999,
+      originalPrice: 199999,
+      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
+      rating: 4.7,
+      reviews: 156,
+      discount: 0,
+      category: "Laptops",
+      brand: "Microsoft",
+      inStock: true,
+      stockCount: 8,
+      description: "Versatile 2-in-1 laptop with detachable screen and Surface Pen support.",
+      specifications: {
+        "Brand": "Microsoft",
+        "Model": "Surface Laptop Studio 2",
+        "Category": "Laptops",
+        "Warranty": "1 Year",
+        "Color": "Platinum"
+      }
+    }
+  ];
+  
+  return newArrivalsProducts;
+};
+
+const summerSaleProducts = generateSummerSaleProducts();
+const newArrivalsProducts = generateNewArrivalsProducts();
+export const allProductsWithSummerSale = [...allProducts, ...summerSaleProducts, ...newArrivalsProducts];
+
+// Pre-defined featured products for better performance - select high-quality products
+export const featuredProducts = allProductsWithSummerSale
+  .filter(product => product.rating >= 4.0 && product.discount >= 10) // High rating and good discount
+  .sort((a, b) => (b.rating * b.discount) - (a.rating * a.discount)) // Sort by rating * discount
+  .slice(0, 24); // Take top 24 products
 
 // Helper functions
 export const getProductsByCategory = (category: string) => {
-  return allProducts.filter(product => product.category === category);
+  return allProductsWithSummerSale.filter(product => product.category === category);
 };
 
 export const searchProducts = (query: string) => {
   const lowerQuery = query.toLowerCase();
-  return allProducts.filter(product => 
+  return allProductsWithSummerSale.filter(product => 
     product.name.toLowerCase().includes(lowerQuery) ||
     product.category.toLowerCase().includes(lowerQuery) ||
     product.brand.toLowerCase().includes(lowerQuery)
@@ -141,7 +413,7 @@ export const getProductSuggestions = (query: string, limit: number = 5) => {
   if (!query.trim()) return [];
   
   const lowerQuery = query.toLowerCase();
-  const suggestions = allProducts
+  const suggestions = allProductsWithSummerSale
     .filter(product => 
       product.name.toLowerCase().includes(lowerQuery) ||
       product.brand.toLowerCase().includes(lowerQuery)
@@ -152,7 +424,7 @@ export const getProductSuggestions = (query: string, limit: number = 5) => {
 };
 
 export const getProductById = (id: number) => {
-  return allProducts.find(product => product.id === id);
+  return allProductsWithSummerSale.find(product => product.id === id);
 };
 
 // Categories with proper organization

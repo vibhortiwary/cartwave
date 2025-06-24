@@ -4,26 +4,29 @@ import { ArrowLeft, Filter, Grid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import SearchWithSuggestions from "@/components/SearchWithSuggestions";
-import { allProducts, searchProducts } from "@/data/products";
+import { allProductsWithSummerSale, searchProducts } from "@/data/products";
 import { aiRecommendationService } from "@/services/aiRecommendations";
+import { useCart } from "@/contexts/CartContext";
 
 const Products = () => {
-  const [products, setProducts] = useState(allProducts);
+  const [products, setProducts] = useState(allProductsWithSummerSale);
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("featured");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isLoading, setIsLoading] = useState(false);
+  const { addToCart } = useCart();
 
   const searchQuery = searchParams.get('search') || '';
   const categoryQuery = searchParams.get('category') || '';
+  const sortQuery = searchParams.get('sort') || '';
 
-  const categories = ["All", ...Array.from(new Set(allProducts.map(p => p.category)))];
+  const categories = ["All", ...Array.from(new Set(allProductsWithSummerSale.map(p => p.category)))];
 
   useEffect(() => {
     const filterAndSortProducts = async () => {
       setIsLoading(true);
-      let filtered = allProducts;
+      let filtered = allProductsWithSummerSale;
 
       // Handle search query
       if (searchQuery) {
@@ -38,6 +41,20 @@ const Products = () => {
         setSelectedCategory(categoryQuery);
       } else if (selectedCategory !== "All") {
         filtered = filtered.filter(product => product.category === selectedCategory);
+      }
+
+      // Handle special filters from URL
+      if (sortQuery === "summer-sale") {
+        // Filter products with 40-50% discount
+        filtered = filtered.filter(product => product.discount >= 40 && product.discount <= 50);
+        setSortBy("discount");
+      } else if (sortQuery === "new-arrivals") {
+        // Filter newer products (last 200 products by ID)
+        const maxId = Math.max(...allProductsWithSummerSale.map(p => p.id));
+        filtered = filtered.filter(product => product.id > maxId - 200);
+        setSortBy("featured");
+      } else if (sortQuery) {
+        setSortBy(sortQuery);
       }
 
       // Sort products
@@ -64,7 +81,7 @@ const Products = () => {
     };
 
     filterAndSortProducts();
-  }, [searchQuery, categoryQuery, selectedCategory, sortBy]);
+  }, [searchQuery, categoryQuery, sortQuery, selectedCategory, sortBy]);
 
   const handleSearch = (query: string) => {
     setSearchParams({ search: query });
@@ -80,7 +97,7 @@ const Products = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-amber-50">
       <div className="container mx-auto px-4 py-8">
         <Link to="/" className="inline-flex items-center text-blue-600 hover:underline mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -89,8 +106,23 @@ const Products = () => {
 
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            {searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
+            {searchQuery ? `Search Results for "${searchQuery}"` : 
+             sortQuery === "summer-sale" ? "Summer Sale - Up to 50% Off" :
+             sortQuery === "new-arrivals" ? "New Arrivals" :
+             'All Products'}
           </h1>
+          
+          {sortQuery === "summer-sale" && (
+            <p className="text-lg text-gray-600 mb-4">
+              Discover amazing deals with 40-50% discounts on premium electronics and gadgets!
+            </p>
+          )}
+          
+          {sortQuery === "new-arrivals" && (
+            <p className="text-lg text-gray-600 mb-4">
+              Check out the latest tech products and trending gadgets!
+            </p>
+          )}
           
           {/* Search and Filters */}
           <div className="flex flex-col lg:flex-row gap-4 mb-6">
@@ -106,6 +138,7 @@ const Products = () => {
                 value={selectedCategory}
                 onChange={(e) => handleCategoryChange(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg"
+                aria-label="Filter by category"
               >
                 {categories.map(category => (
                   <option key={category} value={category}>{category}</option>
@@ -116,6 +149,7 @@ const Products = () => {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg"
+                aria-label="Sort products"
               >
                 <option value="featured">Featured</option>
                 <option value="price-low">Price: Low to High</option>
@@ -147,15 +181,15 @@ const Products = () => {
 
           {/* Results count */}
           <div className="text-gray-600 mb-4">
-            Showing {products.length} of {allProducts.length} products
+            Showing {products.length} of {allProductsWithSummerSale.length} products
           </div>
         </div>
 
         {/* Loading state */}
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-80"></div>
+            {Array.from({ length: 8 }, (_, i) => (
+              <div key={`loading-${i}`} className="bg-gray-200 animate-pulse rounded-lg h-80"></div>
             ))}
           </div>
         )}
@@ -172,7 +206,6 @@ const Products = () => {
                 key={product.id} 
                 product={product} 
                 viewMode={viewMode}
-                onAddToCart={() => console.log("Added to cart:", product.name)}
               />
             ))}
           </div>

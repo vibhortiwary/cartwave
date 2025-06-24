@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const FeaturedBanner = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -12,21 +12,24 @@ const FeaturedBanner = () => {
       title: "Summer Sale",
       subtitle: "Up to 50% off on Electronics",
       image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=400&fit=crop",
-      color: "from-blue-600 to-purple-600"
+      color: "from-blue-600 to-purple-600",
+      link: "/products?sort=summer-sale"
     },
     {
       id: 2,
       title: "New Arrivals",
-      subtitle: "Latest Fashion Trends",
+      subtitle: "Latest Tech Trends",
       image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=400&fit=crop",
-      color: "from-pink-500 to-rose-500"
+      color: "from-pink-500 to-rose-500",
+      link: "/products?sort=new-arrivals"
     },
     {
       id: 3,
       title: "Tech Deals",
       subtitle: "Best Prices on Gadgets",
       image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=400&fit=crop",
-      color: "from-green-500 to-emerald-500"
+      color: "from-green-500 to-emerald-500",
+      link: "/products?category=Smartphones&sort=price-low"
     }
   ];
 
@@ -64,9 +67,11 @@ const FeaturedBanner = () => {
               <div className="text-white">
                 <h1 className="text-4xl md:text-6xl font-bold mb-4">{banner.title}</h1>
                 <p className="text-xl md:text-2xl mb-6">{banner.subtitle}</p>
-                <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100">
-                  Shop Now
-                </Button>
+                <Link to={banner.link}>
+                  <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100">
+                    Shop Now
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -100,6 +105,7 @@ const FeaturedBanner = () => {
               index === currentSlide ? 'bg-white' : 'bg-white/50'
             }`}
             onClick={() => setCurrentSlide(index)}
+            aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>

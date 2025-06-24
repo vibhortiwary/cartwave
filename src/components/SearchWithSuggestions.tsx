@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useRef } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, Mic, MicOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getProductSuggestions } from "@/data/products";
@@ -22,6 +21,8 @@ const SearchWithSuggestions = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (query.length > 1) {
@@ -74,6 +75,36 @@ const SearchWithSuggestions = ({
     setShowSuggestions(false);
   };
 
+  // Voice-to-text logic
+  const startListening = () => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      alert('Voice recognition not supported in this browser.');
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => setListening(true);
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+      setShowSuggestions(true);
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setListening(false);
+    }
+  };
+
   return (
     <div ref={searchRef} className={`relative ${className}`}>
       <div className="flex items-center">
@@ -97,6 +128,16 @@ const SearchWithSuggestions = ({
               <X className="h-4 w-4" />
             </Button>
           )}
+          {/* Voice-to-text mic button */}
+          <Button
+            variant={listening ? "secondary" : "ghost"}
+            size="sm"
+            onClick={listening ? stopListening : startListening}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 h-6 w-6"
+            aria-label={listening ? "Stop listening" : "Start voice search"}
+          >
+            {listening ? <MicOff className="h-4 w-4 text-red-500 animate-pulse" /> : <Mic className="h-4 w-4 text-blue-500" />}
+          </Button>
         </div>
         <Button 
           onClick={handleSearch}
@@ -127,7 +168,7 @@ const SearchWithSuggestions = ({
                     {product.name}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {product.category} • ${product.price}
+                    {product.category} • ₹{product.price.toLocaleString('en-IN')}
                   </div>
                 </div>
               </div>

@@ -1,71 +1,23 @@
-
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/contexts/CartContext";
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "MacBook Pro 16-inch",
-      price: 2399.99,
-      originalPrice: 2699.99,
-      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200",
-      quantity: 1,
-      category: "Laptops",
-      inStock: true
-    },
-    {
-      id: 2,
-      name: "iPhone 15 Pro",
-      price: 999.99,
-      originalPrice: 1099.99,
-      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=200",
-      quantity: 2,
-      category: "Smartphones",
-      inStock: true
-    },
-    {
-      id: 3,
-      name: "Sony WH-1000XM5",
-      price: 349.99,
-      originalPrice: 399.99,
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200",
-      quantity: 1,
-      category: "Audio",
-      inStock: false
-    }
-  ]);
+  const { cartItems, updateQuantity, removeFromCart, getCartTotal } = useCart();
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity === 0) {
-      removeItem(id);
-    } else {
-      setCartItems(items =>
-        items.map(item =>
-          item.id === id ? { ...item, quantity: newQuantity } : item
-        )
-      );
-    }
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = getCartTotal();
   const originalTotal = cartItems.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
   const savings = originalTotal - subtotal;
-  const shipping = subtotal > 50 ? 0 : 9.99;
-  const tax = subtotal * 0.08; // 8% tax
+  const shipping = subtotal > 1000 ? 0 : 99; // Free shipping above ₹1,000
+  const tax = subtotal * 0.18; // 18% GST
   const total = subtotal + shipping + tax;
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-amber-50">
         <div className="container mx-auto px-4 py-8">
           <Link to="/" className="inline-flex items-center text-blue-600 hover:underline mb-8">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -76,7 +28,7 @@ const Cart = () => {
             <ShoppingBag className="h-24 w-24 text-gray-300 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
             <p className="text-gray-600 mb-6">Add some products to get started!</p>
-            <Link to="/">
+            <Link to="/products">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
                 Start Shopping
               </Button>
@@ -88,7 +40,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-amber-50">
       <div className="container mx-auto px-4 py-8">
         <Link to="/" className="inline-flex items-center text-blue-600 hover:underline mb-8">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -131,7 +83,7 @@ const Cart = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeFromCart(item.id)}
                             className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -140,10 +92,10 @@ const Cart = () => {
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
-                            <span className="font-bold text-lg">${item.price}</span>
+                            <span className="font-bold text-lg">₹{item.price.toLocaleString('en-IN')}</span>
                             {item.originalPrice > item.price && (
                               <span className="text-sm text-gray-500 line-through">
-                                ${item.originalPrice}
+                                ₹{item.originalPrice.toLocaleString('en-IN')}
                               </span>
                             )}
                           </div>
@@ -174,9 +126,9 @@ const Cart = () => {
                         </div>
 
                         <div className="text-right">
-                          <span className="font-semibold">
-                            Subtotal: ${(item.price * item.quantity).toFixed(2)}
-                          </span>
+                          <div className="text-sm text-gray-600">
+                            Subtotal: ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -194,40 +146,40 @@ const Cart = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Subtotal ({cartItems.length} items)</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>₹{subtotal.toLocaleString('en-IN')}</span>
                 </div>
                 
                 {savings > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Savings</span>
-                    <span>-${savings.toFixed(2)}</span>
+                    <span>You Save</span>
+                    <span>-₹{savings.toLocaleString('en-IN')}</span>
                   </div>
                 )}
                 
                 <div className="flex justify-between">
                   <span>Shipping</span>
                   <span className={shipping === 0 ? "text-green-600" : ""}>
-                    {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                    {shipping === 0 ? "Free" : `₹${shipping.toLocaleString('en-IN')}`}
                   </span>
                 </div>
                 
                 <div className="flex justify-between">
-                  <span>Estimated Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>GST (18%)</span>
+                  <span>₹{tax.toLocaleString('en-IN')}</span>
                 </div>
                 
                 <Separator />
                 
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>₹{total.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
               {shipping > 0 && (
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-700">
-                    Add ${(50 - subtotal).toFixed(2)} more for FREE shipping!
+                    Add ₹{(1000 - subtotal).toLocaleString('en-IN')} more for free shipping!
                   </p>
                 </div>
               )}
@@ -238,7 +190,7 @@ const Cart = () => {
                     Proceed to Checkout
                   </Button>
                 </Link>
-                <Link to="/" className="block">
+                <Link to="/products" className="block">
                   <Button variant="outline" size="lg" className="w-full">
                     Continue Shopping
                   </Button>
@@ -248,7 +200,7 @@ const Cart = () => {
               {/* Payment Methods */}
               <div className="mt-6 pt-6 border-t">
                 <p className="text-sm font-medium text-gray-900 mb-3">We Accept</p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-5 gap-2">
                   <div className="bg-gray-100 rounded p-2 text-center text-xs font-medium">
                     VISA
                   </div>
@@ -261,7 +213,13 @@ const Cart = () => {
                   <div className="bg-gray-100 rounded p-2 text-center text-xs font-medium">
                     PPL
                   </div>
+                  <div className="bg-green-100 rounded p-2 text-center text-xs font-medium text-green-700 border border-green-200">
+                    COD
+                  </div>
                 </div>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Cash on Delivery available for orders up to ₹2,000
+                </p>
               </div>
             </div>
           </div>

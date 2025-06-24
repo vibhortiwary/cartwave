@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Heart, Star, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { useCart } from "@/contexts/CartContext";
 
 interface Product {
   id: number;
@@ -16,24 +16,25 @@ interface Product {
   reviews: number;
   discount: number;
   category: string;
+  inStock: boolean;
 }
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: () => void;
   viewMode?: "grid" | "list";
 }
 
-const ProductCard = ({ product, onAddToCart, viewMode = "grid" }: ProductCardProps) => {
+const ProductCard = ({ product, viewMode = "grid" }: ProductCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { addToCart } = useCart();
   const isWishlisted = isInWishlist(product.id);
 
   const handleAddToCart = async () => {
     setIsLoading(true);
     // Simulate API call
     setTimeout(() => {
-      onAddToCart();
+      addToCart(product);
       setIsLoading(false);
     }, 500);
   };
@@ -93,11 +94,11 @@ const ProductCard = ({ product, onAddToCart, viewMode = "grid" }: ProductCardPro
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <span className="text-xl font-bold text-gray-900">
-                  ${product.price}
+                  ₹{product.price.toLocaleString('en-IN')}
                 </span>
                 {product.originalPrice > product.price && (
                   <span className="text-sm text-gray-500 line-through">
-                    ${product.originalPrice}
+                    ₹{product.originalPrice.toLocaleString('en-IN')}
                   </span>
                 )}
               </div>
@@ -186,11 +187,11 @@ const ProductCard = ({ product, onAddToCart, viewMode = "grid" }: ProductCardPro
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
             <span className="text-xl font-bold text-gray-900">
-              ${product.price}
+              ₹{product.price.toLocaleString('en-IN')}
             </span>
             {product.originalPrice > product.price && (
               <span className="text-sm text-gray-500 line-through">
-                ${product.originalPrice}
+                ₹{product.originalPrice.toLocaleString('en-IN')}
               </span>
             )}
           </div>

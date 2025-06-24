@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, CreditCard, Truck, MapPin, User, Mail, Phone, Lock } from "lucide-react";
+import { ArrowLeft, CreditCard, Truck, MapPin, User, Mail, Phone, Lock, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useCart } from "@/contexts/CartContext";
 
 const Checkout = () => {
+  const { cartItems, getCartTotal } = useCart();
   const [shippingInfo, setShippingInfo] = useState({
     firstName: "",
     lastName: "",
@@ -21,7 +22,7 @@ const Checkout = () => {
     city: "",
     state: "",
     zipCode: "",
-    country: "US"
+    country: "IN"
   });
 
   const [billingInfo, setBillingInfo] = useState({
@@ -32,7 +33,7 @@ const Checkout = () => {
     city: "",
     state: "",
     zipCode: "",
-    country: "US"
+    country: "IN"
   });
 
   const [paymentInfo, setPaymentInfo] = useState({
@@ -45,26 +46,9 @@ const Checkout = () => {
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("card");
 
-  const cartItems = [
-    {
-      id: 1,
-      name: "MacBook Pro 16-inch",
-      price: 2399.99,
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100"
-    },
-    {
-      id: 2,
-      name: "iPhone 15 Pro",
-      price: 999.99,
-      quantity: 2,
-      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=100"
-    }
-  ];
-
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = 0; // Free shipping
-  const tax = subtotal * 0.08;
+  const subtotal = getCartTotal();
+  const shipping = subtotal > 1000 ? 0 : 99; // Free shipping above ₹1,000
+  const tax = subtotal * 0.18; // 18% GST
   const total = subtotal + shipping + tax;
 
   const handlePlaceOrder = () => {
@@ -77,7 +61,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-amber-50">
       <div className="container mx-auto px-4 py-8">
         <Link to="/cart" className="inline-flex items-center text-blue-600 hover:underline mb-8">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -111,7 +95,7 @@ const Checkout = () => {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="+91 98765 43210"
                     value={shippingInfo.phone}
                     onChange={(e) => setShippingInfo(prev => ({ ...prev, phone: e.target.value }))}
                     className="mt-1"
@@ -191,18 +175,24 @@ const Checkout = () => {
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ny">New York</SelectItem>
-                        <SelectItem value="ca">California</SelectItem>
-                        <SelectItem value="tx">Texas</SelectItem>
-                        <SelectItem value="fl">Florida</SelectItem>
+                        <SelectItem value="mh">Maharashtra</SelectItem>
+                        <SelectItem value="dl">Delhi</SelectItem>
+                        <SelectItem value="ka">Karnataka</SelectItem>
+                        <SelectItem value="tn">Tamil Nadu</SelectItem>
+                        <SelectItem value="up">Uttar Pradesh</SelectItem>
+                        <SelectItem value="gj">Gujarat</SelectItem>
+                        <SelectItem value="wb">West Bengal</SelectItem>
+                        <SelectItem value="ap">Andhra Pradesh</SelectItem>
+                        <SelectItem value="ts">Telangana</SelectItem>
+                        <SelectItem value="kl">Kerala</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="zipCode">ZIP Code *</Label>
+                    <Label htmlFor="zipCode">PIN Code *</Label>
                     <Input
                       id="zipCode"
-                      placeholder="10001"
+                      placeholder="400001"
                       value={shippingInfo.zipCode}
                       onChange={(e) => setShippingInfo(prev => ({ ...prev, zipCode: e.target.value }))}
                       className="mt-1"
@@ -283,18 +273,24 @@ const Checkout = () => {
                             <SelectValue placeholder="Select state" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="ny">New York</SelectItem>
-                            <SelectItem value="ca">California</SelectItem>
-                            <SelectItem value="tx">Texas</SelectItem>
-                            <SelectItem value="fl">Florida</SelectItem>
+                            <SelectItem value="mh">Maharashtra</SelectItem>
+                            <SelectItem value="dl">Delhi</SelectItem>
+                            <SelectItem value="ka">Karnataka</SelectItem>
+                            <SelectItem value="tn">Tamil Nadu</SelectItem>
+                            <SelectItem value="up">Uttar Pradesh</SelectItem>
+                            <SelectItem value="gj">Gujarat</SelectItem>
+                            <SelectItem value="wb">West Bengal</SelectItem>
+                            <SelectItem value="ap">Andhra Pradesh</SelectItem>
+                            <SelectItem value="ts">Telangana</SelectItem>
+                            <SelectItem value="kl">Kerala</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="billingZipCode">ZIP Code *</Label>
+                        <Label htmlFor="billingZipCode">PIN Code *</Label>
                         <Input
                           id="billingZipCode"
-                          placeholder="10001"
+                          placeholder="400001"
                           value={billingInfo.zipCode}
                           onChange={(e) => setBillingInfo(prev => ({ ...prev, zipCode: e.target.value }))}
                           className="mt-1"
@@ -369,6 +365,22 @@ const Checkout = () => {
                 )}
                 
                 <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="cod" id="cod" />
+                  <Label htmlFor="cod" className="flex items-center">
+                    <DollarSign className="h-4 w-4 mr-2 text-green-600" />
+                    Cash on Delivery (COD)
+                  </Label>
+                </div>
+                
+                {paymentMethod === "cod" && (
+                  <div className="ml-6 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-700">
+                      Pay with cash when your order is delivered. Available for orders up to ₹2,000.
+                    </p>
+                  </div>
+                )}
+                
+                <div className="flex items-center space-x-2">
                   <RadioGroupItem value="paypal" id="paypal" />
                   <Label htmlFor="paypal">PayPal</Label>
                 </div>
@@ -399,7 +411,7 @@ const Checkout = () => {
                       <p className="font-medium text-sm">{item.name}</p>
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
-                    <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="font-medium">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
                   </div>
                 ))}
               </div>
@@ -409,24 +421,26 @@ const Checkout = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>₹{subtotal.toLocaleString('en-IN')}</span>
                 </div>
                 
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span className="text-green-600">FREE</span>
+                  <span className={shipping === 0 ? "text-green-600" : ""}>
+                    {shipping === 0 ? "FREE" : `₹${shipping.toLocaleString('en-IN')}`}
+                  </span>
                 </div>
                 
                 <div className="flex justify-between">
-                  <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>GST (18%)</span>
+                  <span>₹{tax.toLocaleString('en-IN')}</span>
                 </div>
                 
                 <Separator />
                 
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>₹{total.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 

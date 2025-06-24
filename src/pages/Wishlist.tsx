@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { ArrowLeft, Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ const Wishlist = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-amber-50">
       <div className="container mx-auto px-4 py-8">
         <Link to="/" className="inline-flex items-center text-blue-600 hover:underline mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />

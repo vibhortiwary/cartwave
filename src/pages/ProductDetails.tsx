@@ -1,21 +1,26 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Heart, Share2, Star, ShoppingCart, Truck, Shield, RotateCcw } from "lucide-react";
+import { ArrowLeft, Heart, Share2, Star, ShoppingCart, Truck, Shield, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useWishlist } from "@/contexts/WishlistContext";
-import AIRecommendations from "@/components/AIRecommendations";
-import { allProducts } from "@/data/products";
+import { useCart } from "@/contexts/CartContext";
+import ProductCard from "@/components/ProductCard";
+import { allProductsWithSummerSale } from "@/data/products";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [similarProducts, setSimilarProducts] = useState<any[]>([]);
+  const [isLoadingSimilar, setIsLoadingSimilar] = useState(false);
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { addToCart } = useCart();
 
   // Find the product from our data
-  const product = allProducts.find(p => p.id === parseInt(id || '0')) || {
+  const product = allProductsWithSummerSale.find(p => p.id === parseInt(id || '0')) || {
     id: 1,
     name: "MacBook Pro 16-inch M3 Pro",
     price: 2399.99,
@@ -60,6 +65,80 @@ const ProductDetails = () => {
   const isWishlisted = isInWishlist(product.id);
   const images = (product as any).images || [product.image, product.image, product.image, product.image];
 
+  // AI-powered recommendation system
+  useEffect(() => {
+    const getAIRecommendations = () => {
+      setIsLoadingSimilar(true);
+      
+      // Use setTimeout to prevent blocking the UI
+      setTimeout(() => {
+        try {
+          // AI Algorithm: Multi-factor scoring system
+          const recommendations = allProductsWithSummerSale
+            .filter(p => p.id !== product.id)
+            .map(p => {
+              let score = 0;
+              
+              // Category similarity (highest weight)
+              if (p.category === product.category) {
+                score += 50;
+              }
+              
+              // Brand similarity
+              if (p.brand === product.brand) {
+                score += 30;
+              }
+              
+              // Price range similarity (within 30% of current product)
+              const priceDiff = Math.abs(p.price - product.price) / product.price;
+              if (priceDiff <= 0.3) {
+                score += 25;
+              } else if (priceDiff <= 0.5) {
+                score += 15;
+              }
+              
+              // Rating similarity (prefer similar or higher ratings)
+              if (p.rating >= product.rating) {
+                score += 20;
+              } else if (p.rating >= product.rating - 0.5) {
+                score += 10;
+              }
+              
+              // Discount factor (prefer products with good discounts)
+              if (p.discount >= 20) {
+                score += 15;
+              } else if (p.discount >= 10) {
+                score += 8;
+              }
+              
+              // Popularity factor (based on reviews)
+              const reviewScore = Math.min(p.reviews / 1000, 10); // Cap at 10 points
+              score += reviewScore;
+              
+              // Stock availability (prefer in-stock items)
+              if (p.inStock) {
+                score += 5;
+              }
+              
+              return { product: p, score };
+            })
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 8)
+            .map(item => item.product);
+          
+          setSimilarProducts(recommendations);
+        } catch (error) {
+          console.error('Error calculating AI recommendations:', error);
+          setSimilarProducts([]);
+        } finally {
+          setIsLoadingSimilar(false);
+        }
+      }, 150); // Slightly longer delay for AI processing simulation
+    };
+
+    getAIRecommendations();
+  }, [product.id, product.category, product.price, product.brand, product.rating]);
+
   const handleWishlistToggle = () => {
     if (isWishlisted) {
       removeFromWishlist(product.id);
@@ -68,8 +147,20 @@ const ProductDetails = () => {
     }
   };
 
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true);
+    // Simulate API call
+    setTimeout(() => {
+      // Add the product to cart with the selected quantity
+      for (let i = 0; i < quantity; i++) {
+        addToCart(product);
+      }
+      setIsAddingToCart(false);
+    }, 500);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-amber-50">
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-3">
@@ -152,12 +243,12 @@ const ProductDetails = () => {
             <div className="space-y-2">
               <div className="flex items-center space-x-3">
                 <span className="text-3xl font-bold text-gray-900">
-                  ${product.price.toLocaleString()}
+                  ₹{product.price.toLocaleString('en-IN')}
                 </span>
                 {product.originalPrice > product.price && (
                   <>
                     <span className="text-xl text-gray-500 line-through">
-                      ${product.originalPrice.toLocaleString()}
+                      ₹{product.originalPrice.toLocaleString('en-IN')}
                     </span>
                     <Badge className="bg-red-500 hover:bg-red-600">
                       {product.discount}% OFF
@@ -166,7 +257,7 @@ const ProductDetails = () => {
                 )}
               </div>
               <p className="text-sm text-green-600 font-medium">
-                You save ${(product.originalPrice - product.price).toLocaleString()}
+                You save ₹{(product.originalPrice - product.price).toLocaleString('en-IN')}
               </p>
             </div>
 
@@ -198,12 +289,15 @@ const ProductDetails = () => {
               </div>
 
               <div className="flex space-x-4">
-                <Link to="/cart" className="flex-1">
-                  <Button size="lg" className="w-full bg-orange-500 hover:bg-orange-600">
-                    <ShoppingCart className="h-5 w-5 mr-2" />
-                    Add to Cart
-                  </Button>
-                </Link>
+                <Button 
+                  size="lg" 
+                  className="flex-1 bg-orange-500 hover:bg-orange-600"
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart}
+                >
+                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  {isAddingToCart ? "Adding..." : "Add to Cart"}
+                </Button>
                 <Button
                   variant="outline"
                   size="lg"
@@ -230,7 +324,7 @@ const ProductDetails = () => {
                 <Truck className="h-5 w-5 text-blue-600" />
                 <div>
                   <p className="font-medium">Free Delivery</p>
-                  <p className="text-sm text-gray-600">Order above $50</p>
+                  <p className="text-sm text-gray-600">Order above ₹1,000</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -319,10 +413,35 @@ const ProductDetails = () => {
         </Tabs>
 
         {/* AI Recommendations */}
-        <AIRecommendations 
-          currentProduct={product}
-          title="Similar Products You Might Like"
-        />
+        <div className="mt-8">
+          <div className="flex items-center mb-6">
+            <Sparkles className="h-6 w-6 text-blue-600 mr-2" />
+            <h2 className="text-2xl font-bold text-gray-800">AI Recommended for You</h2>
+            <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+              AI Powered
+            </span>
+          </div>
+          {isLoadingSimilar ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-80"></div>
+              ))}
+            </div>
+          ) : similarProducts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {similarProducts.map((similarProduct) => (
+                <ProductCard 
+                  key={similarProduct.id} 
+                  product={similarProduct}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>No AI recommendations available at the moment.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
